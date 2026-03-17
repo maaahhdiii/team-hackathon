@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VulnLab — Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Nav -->
+  <nav class="topnav">
+    <span class="brand">VULN<span>LAB</span></span>
+    <a href="login.html"   data-page="login.html">Login</a>
+    <a href="search.html"  data-page="search.html">Search</a>
+    <a href="comments.html" data-page="comments.html">Comments</a>
+    <span id="nav-user"></span>
+    <button class="btn btn-danger" id="btn-logout" style="display:none;padding:4px 10px;font-size:0.72rem;">Logout</button>
+  </nav>
+
+  <!-- Page -->
+  <main class="page">
+    <div class="card">
+      <div class="page-header">
+        <div class="eyebrow">// authentication</div>
+        <h1>Sign In</h1>
+      </div>
+
+      <div id="msg" class="alert"></div>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="alice" autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+
+      <button class="btn btn-primary" id="btn-login">Login</button>
+
+      <div class="vuln-bar" id="vuln-bar" style="margin-top:1.5rem;"></div>
+    </div>
+  </main>
+
+  <footer>VulnLab &nbsp;·&nbsp; Cybersecurity Training Platform &nbsp;·&nbsp; For educational use only</footer>
+</div>
+
+<script src="script.js"></script>
+<script>
+  renderVulnBar("vuln-bar");
+
+  // If already logged in, redirect
+  if (getToken()) location.href = "search.html";
+
+  document.getElementById("btn-login").addEventListener("click", async () => {
+    hideAlert("msg");
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+    if (!username || !password) {
+      return showAlert("msg", "Please enter username and password.");
+    }
+
+    const btn = document.getElementById("btn-login");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Authenticating…';
+
+    try {
+      const res = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showAlert("msg", data.error || "Login failed.");
+      } else {
+        setToken(data.token);
+        setUsername(data.username);
+        showAlert("msg", `Welcome, ${data.username}! Redirecting…`, "success");
+        setTimeout(() => location.href = "search.html", 800);
+      }
+    } catch (err) {
+      showAlert("msg", "Cannot reach backend. Is it running on port 8001?");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Login";
+    }
+  });
+
+  // Submit on Enter
+  ["username", "password"].forEach(id => {
+    document.getElementById(id).addEventListener("keydown", e => {
+      if (e.key === "Enter") document.getElementById("btn-login").click();
+    });
+  });
+</script>
+</body>
+</html>

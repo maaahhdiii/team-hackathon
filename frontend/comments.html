@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VulnLab — Comments</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <nav class="topnav">
+    <span class="brand">VULN<span>LAB</span></span>
+    <a href="login.html"    data-page="login.html">Login</a>
+    <a href="search.html"   data-page="search.html">Search</a>
+    <a href="comments.html" data-page="comments.html">Comments</a>
+    <span id="nav-user"></span>
+    <button class="btn btn-danger" id="btn-logout" style="display:none;padding:4px 10px;font-size:0.72rem;">Logout</button>
+  </nav>
+
+  <main class="page">
+    <div class="card wide">
+      <div class="page-header">
+        <div class="eyebrow">// community board</div>
+        <h1>Comments</h1>
+      </div>
+
+      <!-- Post form -->
+      <div id="post-msg" class="alert"></div>
+
+      <div class="field">
+        <label for="author">Display Name</label>
+        <input type="text" id="author" placeholder="Your name" maxlength="80" />
+      </div>
+      <div class="field">
+        <label for="body">Comment</label>
+        <textarea id="body" placeholder="Write something…" maxlength="1000"></textarea>
+      </div>
+      <button class="btn btn-primary" id="btn-post">Post Comment</button>
+
+      <hr class="divider" />
+
+      <!-- Comment list -->
+      <div id="list-msg" class="alert"></div>
+      <div id="comments-list">
+        <p style="color:var(--muted);font-size:0.85rem;">Loading comments…</p>
+      </div>
+
+      <div class="vuln-bar" id="vuln-bar" style="margin-top:1.5rem;"></div>
+    </div>
+  </main>
+
+  <footer>VulnLab &nbsp;·&nbsp; Cybersecurity Training Platform &nbsp;·&nbsp; For educational use only</footer>
+</div>
+
+<script src="script.js"></script>
+<script>
+  if (!requireAuth()) throw new Error("redirect");
+  renderVulnBar("vuln-bar");
+
+  // Pre-fill author from stored username
+  const stored = getUsername();
+  if (stored) document.getElementById("author").value = stored;
+
+  async function loadComments() {
+    try {
+      const res = await fetch(`${API}/comments`, { headers: authHeaders() });
+      if (res.status === 401) { clearAuth(); location.href = "login.html"; return; }
+      const data = await res.json();
+      const list = document.getElementById("comments-list");
+
+      if (!data.comments || data.comments.length === 0) {
+        list.innerHTML = `<p style="color:var(--muted);font-size:0.85rem;">No comments yet. Be the first!</p>`;
+        return;
+      }
+
+      // When XSS flag is ON, the backend returns raw HTML — set innerHTML directly (vulnerable).
+      // When XSS flag is OFF, the backend already escaped content — safe to use innerHTML (nothing to execute).
+      list.innerHTML = data.comments.map(c => `
+        <div class="comment-item">
+          <div class="comment-meta">
+            <span class="comment-author">${c.author}</span>
+            <span class="comment-date">${c.created_at.replace("T", " ").slice(0, 16)} UTC</span>
+          </div>
+          <div class="comment-body">${c.body}</div>
+        </div>
+      `).join("");
+    } catch (_) {
+      showAlert("list-msg", "Failed to load comments.");
+    }
+  }
+
+  document.getElementById("btn-post").addEventListener("click", async () => {
+    hideAlert("post-msg");
+    const author = document.getElementById("author").value.trim();
+    const body   = document.getElementById("body").value.trim();
+    if (!author || !body) return showAlert("post-msg", "Name and comment are required.");
+
+    const btn = document.getElementById("btn-post");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Posting…';
+
+    try {
+      const res = await fetch(`${API}/comment`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ author, body }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showAlert("post-msg", data.error || "Failed to post comment.");
+      } else {
+        document.getElementById("body").value = "";
+        showAlert("post-msg", "Comment posted!", "success");
+        await loadComments();
+      }
+    } catch (_) {
+      showAlert("post-msg", "Cannot reach backend.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Post Comment";
+    }
+  });
+
+  loadComments();
+</script>
+</body>
+</html>

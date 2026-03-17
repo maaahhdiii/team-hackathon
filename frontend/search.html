@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VulnLab — Search</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <nav class="topnav">
+    <span class="brand">VULN<span>LAB</span></span>
+    <a href="login.html"    data-page="login.html">Login</a>
+    <a href="search.html"   data-page="search.html">Search</a>
+    <a href="comments.html" data-page="comments.html">Comments</a>
+    <span id="nav-user"></span>
+    <button class="btn btn-danger" id="btn-logout" style="display:none;padding:4px 10px;font-size:0.72rem;">Logout</button>
+  </nav>
+
+  <main class="page">
+    <div class="card wide">
+      <div class="page-header">
+        <div class="eyebrow">// product catalog</div>
+        <h1>Search</h1>
+      </div>
+
+      <div id="msg" class="alert"></div>
+
+      <div class="search-row field">
+        <input type="text" id="q" placeholder="e.g. widget, software…" />
+        <button class="btn btn-primary" id="btn-search" style="width:auto;">Search</button>
+      </div>
+
+      <div id="results-container" style="display:none;">
+        <div class="results-meta" id="results-meta"></div>
+        <div id="results-list"></div>
+      </div>
+
+      <div class="vuln-bar" id="vuln-bar"></div>
+    </div>
+  </main>
+
+  <footer>VulnLab &nbsp;·&nbsp; Cybersecurity Training Platform &nbsp;·&nbsp; For educational use only</footer>
+</div>
+
+<script src="script.js"></script>
+<script>
+  if (!requireAuth()) throw new Error("redirect");
+  renderVulnBar("vuln-bar");
+
+  async function doSearch() {
+    hideAlert("msg");
+    const q = document.getElementById("q").value;
+    const btn = document.getElementById("btn-search");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    try {
+      const res = await fetch(`${API}/search?q=${encodeURIComponent(q)}`, {
+        headers: authHeaders(),
+      });
+
+      if (res.status === 401) {
+        clearAuth();
+        location.href = "login.html";
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showAlert("msg", data.error || "Search failed.");
+        document.getElementById("results-container").style.display = "none";
+        return;
+      }
+
+      const container = document.getElementById("results-container");
+      const meta = document.getElementById("results-meta");
+      const list = document.getElementById("results-list");
+
+      container.style.display = "block";
+      meta.textContent = `${data.count} result${data.count !== 1 ? "s" : ""} for "${q || "*"}"`;
+
+      if (data.results.length === 0) {
+        list.innerHTML = `<p style="color:var(--muted);font-size:0.85rem;padding:1rem 0;">No products found.</p>`;
+      } else {
+        list.innerHTML = data.results.map(r => `
+          <div class="result-item">
+            <div>
+              <span class="result-name">${r.name}</span>
+              <span class="result-cat">${r.category}</span>
+            </div>
+            <div class="result-desc">${r.description}</div>
+          </div>
+        `).join("");
+      }
+    } catch (err) {
+      showAlert("msg", "Cannot reach backend.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Search";
+    }
+  }
+
+  document.getElementById("btn-search").addEventListener("click", doSearch);
+  document.getElementById("q").addEventListener("keydown", e => {
+    if (e.key === "Enter") doSearch();
+  });
+
+  // Auto-search on load to show all products
+  doSearch();
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+/* ──────────────────────────────────────────────
+   VulnLab — Cybersecurity Training Platform
+   Aesthetic: Industrial terminal / dark ops
+   ────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700&display=swap');
+
+:root {
+  --bg:        #0a0c0f;
+  --bg2:       #111418;
+  --bg3:       #181c22;
+  --border:    #1e2530;
+  --accent:    #00e5ff;
+  --accent2:   #ff3c3c;
+  --accent3:   #39ff14;
+  --text:      #c8d4e0;
+  --muted:     #4a5568;
+  --mono:      'Share Tech Mono', monospace;
+  --sans:      'Barlow', sans-serif;
+  --radius:    4px;
+  --glow:      0 0 12px rgba(0, 229, 255, 0.35);
+  --glow-red:  0 0 12px rgba(255, 60, 60, 0.4);
+  --glow-grn:  0 0 12px rgba(57, 255, 20, 0.35);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle scan-line overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.06) 3px,
+    rgba(0,0,0,0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Layout ─────────────────────────────────── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Top Nav ─────────────────────────────────── */
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 2rem;
+  height: 56px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topnav .brand {
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-shadow: var(--glow);
+  margin-right: auto;
+}
+
+.topnav .brand span { color: var(--accent2); text-shadow: var(--glow-red); }
+
+.topnav a {
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.topnav a:hover, .topnav a.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+  text-decoration: none;
+}
+
+#nav-user {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent3);
+  text-shadow: var(--glow-grn);
+}
+
+/* ── Page Content ─────────────────────────────── */
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 3rem 1rem 4rem;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+  animation: fadeUp 0.4s ease both;
+}
+
+.card.wide { max-width: 780px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Page Header ─────────────────────────────── */
+.page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.page-header .eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: var(--glow);
+  margin-bottom: 0.5rem;
+}
+
+.page-header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+/* ── Forms ───────────────────────────────────── */
+.field {
+  margin-bottom: 1.25rem;
+}
+
+label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+  font-family: var(--mono);
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.9rem;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+textarea { resize: vertical; min-height: 90px; }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.4rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  box-shadow: var(--glow);
+  width: 100%;
+}
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-danger {
+  background: var(--accent2);
+  color: #fff;
+  box-shadow: var(--glow-red);
+}
+.btn-danger:hover { opacity: 0.85; }
+
+/* ── Alerts / Messages ───────────────────────── */
+.alert {
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  margin-bottom: 1rem;
+  display: none;
+}
+.alert.show { display: block; animation: fadeUp 0.25s ease both; }
+.alert-error   { background: rgba(255,60,60,0.12); border: 1px solid var(--accent2); color: var(--accent2); }
+.alert-success { background: rgba(57,255,20,0.08); border: 1px solid var(--accent3); color: var(--accent3); }
+.alert-info    { background: rgba(0,229,255,0.08); border: 1px solid var(--accent); color: var(--accent); }
+
+/* ── Search Results ──────────────────────────── */
+.results-meta {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-item {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.3s ease both;
+}
+.result-item:last-child { border-bottom: none; }
+
+.result-item .result-name {
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.95rem;
+}
+.result-item .result-cat {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--accent);
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.result-item .result-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+/* ── Comment List ────────────────────────────── */
+.comment-item {
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.3s ease both;
+}
+.comment-item:last-child { border-bottom: none; }
+
+.comment-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+.comment-author {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--accent3);
+  text-shadow: var(--glow-grn);
+}
+.comment-date {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.comment-body {
+  font-size: 0.9rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+/* ── Vuln Status Badge ───────────────────────── */
+.vuln-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.badge {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+.badge-off { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+.badge-on  { background: rgba(255,60,60,0.18); color: var(--accent2); border: 1px solid var(--accent2); text-shadow: var(--glow-red); }
+
+/* ── Search bar row ──────────────────────────── */
+.search-row {
+  display: flex;
+  gap: 0.75rem;
+}
+.search-row input { flex: 1; }
+.search-row .btn { white-space: nowrap; }
+
+/* ── Divider ─────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* ── Footer ──────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  letter-spacing: 0.05em;
+}
+
+/* ── Spinner ─────────────────────────────────── */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(0,229,255,0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,59 @@
+# VulnLab REST Client Test File for VS Code
+# Install: REST Client extension (humao.rest-client)
+# Usage: Click "Send Request" above each block. Servers must run (localhost:8001 API).
+# Adapted for VulnLab API (port 8001, endpoints /flags/activate, weak JWT secret).
+
+# ========= INSTRUCTIONS =========
+# 1. Ensure servers running: Frontend localhost:8000, Backend localhost:8001
+# 2. For Step 3 JWT:
+#    - Go https://jwt.io
+#    - Payload: {"sub": "admin"}
+#    - Secret (weak when auth_bypass ON): secret
+#    - Copy encoded token from right panel
+#    - Paste below in Authorization header (replace PASTE_TOKEN_HERE)
+# 3. Run steps sequentially. Vuln bar on frontend shows status.
+
+### Step 1 - Check server health and current vulns
+GET http://localhost:8001/health
+
+### Step 2 - Login to get initial token (optional baseline)
+POST http://localhost:8001/login
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "password": "password123"
+}
+
+### Step 3 - Activate AUTH BYPASS vuln (enables weak secret)
+POST http://localhost:8001/flags/activate
+Content-Type: application/json
+
+{
+  "secret": "admin-secret",
+  "vuln": "auth_bypass"
+}
+
+### Step 4 - Forge JWT & Access protected endpoint
+# PASTE YOUR FORGED TOKEN BELOW (jwt.io: payload {"sub":"admin"}, secret: "secret")
+# Test /search as example protected (requires auth)
+GET http://localhost:8001/search?q=test
+Authorization: Bearer PASTE_YOUR_FORGED_TOKEN_HERE
+
+### Step 5 - Deactivate AUTH BYPASS (restore secure mode)
+POST http://localhost:8001/flags/deactivate
+Content-Type: application/json
+
+{
+  "secret": "admin-secret",
+  "vuln": "auth_bypass"
+}
+
+### Bonus: Check health again (vuln OFF)
+GET http://localhost:8001/health
+
+# Expected: 
+# - Step 1/6: auth_bypass=False
+# - Step 3: auth_bypass=True  
+# - Step 4: Succeeds with forged weak JWT even expired/invalid strong sig
+# VS Code will show response + status!
